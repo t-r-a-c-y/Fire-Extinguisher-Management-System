@@ -1,0 +1,151 @@
+# ============================================================================
+# TZW LTD — Fire Extinguisher Management System (RESTful Microservices)
+#
+#   docker compose up --build        # start the whole backend + database
+#   docker compose logs -f gateway   # follow the gateway logs
+#   docker compose down -v           # stop and wipe the database volume
+#
+# Public entrypoint: http://localhost:8080  (API gateway)
+# ============================================================================
+
+x-service-env: &service-env
+  DATABASE_URL: postgres://${PGUSER:-fems}:${PGPASSWORD:-fems_password}@postgres:5432/${PGDATABASE:-fems}
+  JWT_SECRET: ${JWT_SECRET:-dev_access_secret_change_me}
+  JWT_REFRESH_SECRET: ${JWT_REFRESH_SECRET:-dev_refresh_secret_change_me}
+  CORS_ORIGIN: ${CORS_ORIGIN:-*}
+  NODE_ENV: ${NODE_ENV:-production}
+
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: fems-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${PGUSER:-fems}
+      POSTGRES_PASSWORD: ${PGPASSWORD:-fems_password}
+      POSTGRES_DB: ${PGDATABASE:-fems}
+    ports:
+      - "${PGPORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${PGUSER:-fems} -d ${PGDATABASE:-fems}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  # One-shot: applies migrations + seed once Postgres is healthy, then exits.
+  migrate:
+    build:
+      context: ./db
+    container_name: fems-migrate
+    environment:
+      DATABASE_URL: postgres://${PGUSER:-fems}:${PGPASSWORD:-fems_password}@postgres:5432/${PGDATABASE:-fems}
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  user-service:
+    build:
+      context: .
+      dockerfile: services/user-service/Dockerfile
+    container_name: fems-user-service
+    environment:
+      <<: *service-env
+      PORT: 4001
+    ports:
+      - "4001:4001"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  extinguisher-service:
+    build:
+      context: .
+      dockerfile: services/extinguisher-service/Dockerfile
+    container_name: fems-extinguisher-service
+    environment:
+      <<: *service-env
+      PORT: 4002
+    ports:
+      - "4002:4002"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  inspection-service:
+    build:
+      context: .
+      dockerfile: services/inspection-service/Dockerfile
+    container_name: fems-inspection-service
+    environment:
+      <<: *service-env
+      PORT: 4003
+    ports:
+      - "4003:4003"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  reporting-service:
+    build:
+      context: .
+      dockerfile: services/reporting-service/Dockerfile
+    container_name: fems-reporting-service
+    environment:
+      <<: *service-env
+      PORT: 4004
+    ports:
+      - "4004:4004"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  notification-service:
+    build:
+      context: .
+      dockerfile: services/notification-service/Dockerfile
+    container_name: fems-notification-service
+    environment:
+      <<: *service-env
+      PORT: 4005
+    ports:
+      - "4005:4005"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    restart: unless-stopped
+
+  gateway:
+    build:
+      context: .
+      dockerfile: services/gateway/Dockerfile
+    container_name: fems-gateway
+    environment:
+      PORT: 8080
+      CORS_ORIGIN: ${CORS_ORIGIN:-*}
+      USER_SERVICE_URL: http://user-service:4001
+      EXTINGUISHER_SERVICE_URL: http://extinguisher-service:4002
+      INSPECTION_SERVICE_URL: http://inspection-service:4003
+      REPORTING_SERVICE_URL: http://reporting-service:4004
+      NOTIFICATION_SERVICE_URL: http://notification-service:4005
+    ports:
+      - "${GATEWAY_PORT:-8080}:8080"
+    depends_on:
+      - user-service
+      - extinguisher-service
+      - inspection-service
+      - reporting-service
+      - notification-service
+    restart: unless-stopped
+
+  # Optional: also expose each service directly for Swagger UI / debugging.
+  # Comment these port maps out if you only want the gateway exposed.
+
+volumes:
+  pgdata:

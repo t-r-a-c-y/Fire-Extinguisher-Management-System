@@ -1,0 +1,12 @@
+**/node_modules
+**/.next
+**/out
+**/dist
+**/build
+**/*.log
+db/backups
+.git
+.env
+frontend
+docs
+*.md
