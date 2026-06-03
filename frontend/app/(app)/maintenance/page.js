@@ -90,7 +90,7 @@ export default function MaintenancePage() {
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Action taken"><input className="input" value={form.actionTaken} onChange={set('actionTaken')} required /></Field>
-            <Field label="Date"><input className="input" type="date" max={new Date().toISOString().slice(0, 10)} value={form.maintenanceDate} onChange={set('maintenanceDate')} required /></Field>
+            <Field label="Date"><input className="input" type="date" min={new Date().toISOString().slice(0, 10)} value={form.maintenanceDate} onChange={set('maintenanceDate')} required /></Field>
           </div>
           <Field label="Issues identified"><textarea className="input" rows={2} value={form.issuesIdentified} onChange={set('issuesIdentified')} /></Field>
           <Field label="Notes"><textarea className="input" rows={2} value={form.notes} onChange={set('notes')} /></Field>
