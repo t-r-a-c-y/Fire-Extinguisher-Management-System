@@ -15,8 +15,8 @@ const empty = { serialNumber: '', location: '', type: 'co2', size: '5lb', instal
 
 export default function ExtinguishersPage() {
   const { user } = useAuth();
-  const canCreate = user.role === 'admin';                    // #14: inspectors cannot add
-  const canEdit = ['admin', 'inspector'].includes(user.role);
+  const canCreate = user.role === 'admin';   // inspectors cannot add
+  const canEdit = user.role === 'admin';     // inspectors cannot edit
   const canDelete = user.role === 'admin';
 
   const [items, setItems] = useState(null);
@@ -38,7 +38,8 @@ export default function ExtinguishersPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  function openCreate() { setForm(empty); setError(''); setModal({ mode: 'create' }); }
+  // On create the installation date is fixed to today (the day of registration).
+  function openCreate() { setForm({ ...empty, installationDate: todayStr() }); setError(''); setModal({ mode: 'create' }); }
   function openEdit(x) {
     setForm({
       serialNumber: x.serialNumber, location: x.location, type: x.type, size: x.size,
@@ -49,6 +50,7 @@ export default function ExtinguishersPage() {
 
   // Client-side date checks mirror the backend rules for instant feedback.
   function dateError() {
+    if (modal?.mode === 'create' && form.installationDate !== todayStr()) return 'Installation date must be today — the date of registration.';
     if (form.installationDate && form.installationDate > todayStr()) return 'Installation date cannot be in the future.';
     if (form.installationDate && form.expiryDate && form.expiryDate <= form.installationDate) return 'Expiry date must be after the installation date.';
     return '';
@@ -152,7 +154,17 @@ export default function ExtinguishersPage() {
           </div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Installation date">
-              <input className="input" type="date" max={todayStr()} value={form.installationDate} onChange={set('installationDate')} required />
+              <input
+                className="input disabled:opacity-70"
+                type="date"
+                max={todayStr()}
+                value={form.installationDate}
+                onChange={set('installationDate')}
+                readOnly={modal?.mode === 'create'}
+                title={modal?.mode === 'create' ? 'Set to today — the date of registration' : undefined}
+                required
+              />
+              {modal?.mode === 'create' && <p className="mt-1 text-xs text-muted">Fixed to today (registration date).</p>}
             </Field>
             <Field label="Expiry date">
               <input className="input" type="date" min={form.installationDate || undefined} value={form.expiryDate} onChange={set('expiryDate')} required />

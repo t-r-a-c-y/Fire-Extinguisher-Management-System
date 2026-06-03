@@ -9,8 +9,8 @@ import { Alert, Field, PasswordInput } from '@/components/ui';
 export default function LoginPage() {
   const { login } = useAuth();
   const router = useRouter();
-  const [email, setEmail] = useState('admin@tzw.com');
-  const [password, setPassword] = useState('Password123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -48,10 +48,6 @@ export default function LoginPage() {
         <div className="mt-4 flex justify-between text-sm">
           <Link className="text-brand-600 hover:underline" href="/forgot-password">Forgot password?</Link>
           <Link className="text-brand-600 hover:underline" href="/register">Create account</Link>
-        </div>
-        <div className="mt-6 rounded-md surface-muted p-3 text-xs text-muted">
-          <p className="font-medium text-slate-600">Demo accounts (password: Password123!)</p>
-          <p>admin@tzw.com · inspector@tzw.com · user@tzw.com</p>
         </div>
       </div>
     </div>

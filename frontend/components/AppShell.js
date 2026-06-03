@@ -26,9 +26,26 @@ function NotificationBell() {
   async function load() {
     try { setData(await api.get('/notifications')); } catch (_) {}
   }
-  useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, []);
+  useEffect(() => {
+    load();
+    const t = setInterval(load, 30000);
+    // Refresh immediately when notifications change anywhere in the app,
+    // and when the tab regains focus, so the unread badge stays accurate.
+    const onChange = () => load();
+    window.addEventListener('fems:notifications-changed', onChange);
+    window.addEventListener('focus', onChange);
+    return () => {
+      clearInterval(t);
+      window.removeEventListener('fems:notifications-changed', onChange);
+      window.removeEventListener('focus', onChange);
+    };
+  }, []);
 
-  async function markAll() { await api.post('/notifications/read-all'); load(); }
+  async function markAll() {
+    await api.post('/notifications/read-all');
+    load();
+    window.dispatchEvent(new Event('fems:notifications-changed'));
+  }
 
   return (
     <div className="relative">

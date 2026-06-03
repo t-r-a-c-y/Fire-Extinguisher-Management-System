@@ -15,8 +15,9 @@ export default function NotificationsPage() {
 
   useEffect(() => { load(); }, [load]);
 
-  async function markRead(id) { await api.patch(`/notifications/${id}/read`); load(); }
-  async function markAll() { await api.post('/notifications/read-all'); load(); }
+  function announce() { window.dispatchEvent(new Event('fems:notifications-changed')); }
+  async function markRead(id) { await api.patch(`/notifications/${id}/read`); load(); announce(); }
+  async function markAll() { await api.post('/notifications/read-all'); load(); announce(); }
 
   return (
     <div className="space-y-5">
