@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { Field, Alert, StatusBadge } from '@/components/ui';
+import { Field, Alert, StatusBadge, PasswordInput } from '@/components/ui';
 
 export default function ProfilePage() {
   const { user, refreshUser } = useAuth();
@@ -47,8 +47,8 @@ export default function ProfilePage() {
         <h2 className="font-semibold">Change password</h2>
         <Alert kind="success">{wMsg}</Alert>
         <Alert>{wErr}</Alert>
-        <Field label="Current password"><input className="input" type="password" value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} required /></Field>
-        <Field label="New password"><input className="input" type="password" value={pw.newPassword} onChange={(e) => setPw({ ...pw, newPassword: e.target.value })} required /></Field>
+        <Field label="Current password"><PasswordInput value={pw.currentPassword} onChange={(e) => setPw({ ...pw, currentPassword: e.target.value })} required autoComplete="current-password" /></Field>
+        <Field label="New password"><PasswordInput value={pw.newPassword} onChange={(e) => setPw({ ...pw, newPassword: e.target.value })} required autoComplete="new-password" /></Field>
         <p className="text-xs text-slate-400">Min 8 characters, including a letter and a number.</p>
         <div><button className="btn-primary">Change password</button></div>
       </form>

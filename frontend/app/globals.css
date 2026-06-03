@@ -5,9 +5,15 @@
 :root {
   color-scheme: light;
 }
+html.dark {
+  color-scheme: dark;
+}
 
 body {
-  @apply bg-slate-50 text-slate-800 antialiased;
+  @apply bg-slate-50 text-slate-800 antialiased transition-colors;
+}
+html.dark body {
+  @apply bg-slate-950 text-slate-200;
 }
 
 @layer components {
@@ -15,12 +21,19 @@ body {
     @apply inline-flex items-center justify-center gap-2 rounded-md px-4 py-2 text-sm font-medium transition disabled:opacity-50 disabled:cursor-not-allowed;
   }
   .btn-primary { @apply btn bg-brand-600 text-white hover:bg-brand-700; }
-  .btn-secondary { @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50; }
-  .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100; }
+  .btn-secondary { @apply btn bg-white text-slate-700 border border-slate-300 hover:bg-slate-50 dark:bg-slate-800 dark:text-slate-200 dark:border-slate-700 dark:hover:bg-slate-700; }
+  .btn-ghost { @apply btn text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800; }
   .input {
-    @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:border-brand-500 focus:ring-1 focus:ring-brand-500 outline-none;
+    @apply w-full rounded-md border border-slate-300 px-3 py-2 text-sm outline-none focus:border-brand-500 focus:ring-1 focus:ring-brand-500
+           dark:border-slate-700 dark:bg-slate-800 dark:text-slate-100 dark:placeholder-slate-500;
   }
-  .label { @apply block text-sm font-medium text-slate-700 mb-1; }
-  .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm; }
+  .label { @apply block text-sm font-medium text-slate-700 mb-1 dark:text-slate-300; }
+  .card { @apply rounded-xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900; }
   .badge { @apply inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium; }
+  /* Theme-aware helpers used across pages */
+  .surface-muted { @apply bg-slate-50 dark:bg-slate-800/60; }
+  .text-muted { @apply text-slate-500 dark:text-slate-400; }
+  .divide-rows > * + * { @apply border-t border-slate-100 dark:border-slate-800; }
+  .table-head { @apply bg-slate-50 text-slate-500 dark:bg-slate-800/60 dark:text-slate-400; }
+  .row-hover:hover { @apply bg-slate-50 dark:bg-slate-800/40; }
 }

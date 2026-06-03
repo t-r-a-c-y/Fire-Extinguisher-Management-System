@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TZW FEMS — Database Model (ERD)</title>
+  <style>
+    :root { --bg:#f8fafc; --fg:#0f172a; --card:#ffffff; --muted:#64748b; --brand:#b91c1c; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    h1 { font-size:18px; margin:0; color:var(--brand); }
+    .sub { color:var(--muted); font-size:13px; margin-top:2px; }
+    .toolbar button { border:1px solid #cbd5e1; background:var(--card); color:var(--fg); padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
+    .toolbar button:hover { background:#f1f5f9; }
+    main { padding:24px; display:flex; justify-content:center; }
+    .canvas { background:var(--card); border:1px solid #e2e8f0; border-radius:12px; padding:24px; width:100%; max-width:1200px; overflow:auto; }
+    .legend { max-width:1200px; margin:0 auto 24px; color:var(--muted); font-size:13px; padding:0 24px; }
+    code { background:#f1f5f9; padding:1px 5px; border-radius:4px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🗄️ TZW FEMS — Database Model (ERD)</h1>
+      <div class="sub">PostgreSQL 16 · UUID keys · enum types · updated_at triggers</div>
+    </div>
+    <div class="toolbar">
+      <button onclick="downloadSvg()">⬇ Download SVG</button>
+    </div>
+  </header>
+
+  <main><div class="canvas"><pre class="mermaid">
+erDiagram
+    users ||--o{ refresh_tokens     : "has"
+    users ||--o{ password_resets    : "has"
+    users ||--o{ fire_extinguishers : "created_by"
+    users ||--o{ inspections        : "assigned / scheduled"
+    users ||--o{ maintenance_logs   : "performed_by"
+    users ||--o{ notifications      : "receives"
+    fire_extinguishers ||--o{ inspections      : "inspected by"
+    fire_extinguishers ||--o{ maintenance_logs : "maintained by"
+    inspections        ||--o{ maintenance_logs : "may trigger"
+
+    users {
+        uuid id PK
+        varchar first_name
+        varchar last_name
+        varchar email UK
+        varchar password_hash
+        user_role role
+        boolean is_active
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    refresh_tokens {
+        uuid id PK
+        uuid user_id FK
+        varchar token_hash
+        timestamptz expires_at
+        boolean revoked
+    }
+    password_resets {
+        uuid id PK
+        uuid user_id FK
+        varchar token_hash
+        timestamptz expires_at
+        boolean used
+    }
+    fire_extinguishers {
+        uuid id PK
+        varchar serial_number UK
+        varchar location
+        extinguisher_type type
+        extinguisher_size size
+        date installation_date
+        date expiry_date
+        extinguisher_status status
+        timestamptz last_inspected_at
+        uuid created_by FK
+        timestamptz created_at
+        timestamptz updated_at
+    }
+    inspections {
+        uuid id PK
+        uuid extinguisher_id FK
+        date scheduled_date
+        time scheduled_time
+        inspection_status status
+        inspection_result result
+        uuid assigned_to FK
+        uuid scheduled_by FK
+        text notes
+        timestamptz completed_at
+    }
+    maintenance_logs {
+        uuid id PK
+        uuid extinguisher_id FK
+        uuid inspection_id FK
+        varchar action_taken
+        date maintenance_date
+        text issues_identified
+        text notes
+        text recommendations
+        uuid performed_by FK
+    }
+    notifications {
+        uuid id PK
+        uuid user_id FK
+        varchar type
+        varchar title
+        text message
+        varchar related_entity
+        uuid related_id
+        boolean is_read
+        timestamptz created_at
+    }
+  </pre></div></main>
+
+  <p class="legend">
+    <strong>Enums:</strong>
+    <code>user_role</code> (admin/inspector/user) ·
+    <code>extinguisher_type</code> (water/co2/foam/dry_chemical) ·
+    <code>extinguisher_size</code> (2.5lb/5lb/9lb/12lb) ·
+    <code>extinguisher_status</code> (active/maintenance/expired/decommissioned) ·
+    <code>inspection_status</code> (pending/completed/overdue/cancelled) ·
+    <code>inspection_result</code> (pass/fail/needs_maintenance).
+    <br/>Deleting a user nulls their references on extinguishers/inspections/maintenance (audit preserved); deleting an extinguisher cascades its inspections &amp; maintenance.
+  </p>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'default' });
+    window.downloadSvg = () => {
+      const svg = document.querySelector('.mermaid svg');
+      if (!svg) return alert('Diagram not ready yet.');
+      const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'fems-database-erd.svg'; a.click();
+      URL.revokeObjectURL(a.href);
+    };
+  </script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>TZW FEMS — System Architecture Diagram</title>
+  <style>
+    :root { --bg:#f8fafc; --fg:#0f172a; --card:#ffffff; --muted:#64748b; --brand:#b91c1c; }
+    * { box-sizing: border-box; }
+    body { margin:0; font-family: system-ui, Segoe UI, Roboto, sans-serif; background:var(--bg); color:var(--fg); }
+    header { padding:20px 24px; border-bottom:1px solid #e2e8f0; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px; }
+    h1 { font-size:18px; margin:0; color:var(--brand); }
+    .sub { color:var(--muted); font-size:13px; margin-top:2px; }
+    .toolbar button { border:1px solid #cbd5e1; background:var(--card); color:var(--fg); padding:8px 14px; border-radius:8px; cursor:pointer; font-size:13px; }
+    .toolbar button:hover { background:#f1f5f9; }
+    main { padding:24px; display:flex; justify-content:center; }
+    .canvas { background:var(--card); border:1px solid #e2e8f0; border-radius:12px; padding:24px; width:100%; max-width:1100px; overflow:auto; }
+    .legend { max-width:1100px; margin:0 auto 24px; color:var(--muted); font-size:13px; padding:0 24px; }
+  </style>
+</head>
+<body>
+  <header>
+    <div>
+      <h1>🔥 TZW FEMS — System Architecture</h1>
+      <div class="sub">RESTful microservices · Next.js · Node/Express · PostgreSQL · JWT · Docker Compose</div>
+    </div>
+    <div class="toolbar">
+      <button onclick="downloadSvg()">⬇ Download SVG</button>
+    </div>
+  </header>
+
+  <main><div class="canvas"><pre class="mermaid">
+flowchart TD
+    classDef client fill:#dbeafe,stroke:#3b82f6,color:#1e3a8a;
+    classDef gw fill:#fee2e2,stroke:#b91c1c,color:#7f1d1d;
+    classDef svc fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef db fill:#fef9c3,stroke:#ca8a04,color:#713f12;
+
+    U([👤 User / Browser]):::client
+    FE["Next.js Frontend<br/>:3000"]:::client
+    GW["API Gateway&nbsp;&nbsp;:8080<br/>routes /api/* · forwards JWT"]:::gw
+
+    subgraph SERVICES [Microservices · each exposes /docs Swagger UI]
+      US["User Service&nbsp;&nbsp;:4001<br/>register · login · JWT · RBAC · profiles"]:::svc
+      ES["Extinguisher Service&nbsp;&nbsp;:4002<br/>CRUD · requests"]:::svc
+      IS["Inspection Service&nbsp;&nbsp;:4003<br/>scheduling · completion · maintenance"]:::svc
+      RS["Reporting Service&nbsp;&nbsp;:4004<br/>reports · PDF / CSV export"]:::svc
+      NS["Notification Service&nbsp;&nbsp;:4005<br/>read / manage notifications"]:::svc
+    end
+
+    DB[("PostgreSQL&nbsp;&nbsp;:5432<br/>users · fire_extinguishers · inspections<br/>maintenance_logs · notifications")]:::db
+
+    U -->|HTTPS| FE
+    FE -->|"JSON + Bearer JWT"| GW
+    GW -->|/api/auth, /api/users| US
+    GW -->|/api/extinguishers| ES
+    GW -->|/api/inspections, /api/maintenance| IS
+    GW -->|/api/reports| RS
+    GW -->|/api/notifications| NS
+
+    US --- DB
+    ES --- DB
+    IS --- DB
+    RS --- DB
+    NS --- DB
+  </pre></div></main>
+
+  <p class="legend">
+    The gateway is the only public entry point. Every service independently validates the JWT (shared secret), so services stay stateless and independently deployable.
+    All services share one PostgreSQL instance (each touches only its own tables); the Reporting service reads across tables for analytics.
+  </p>
+
+  <script type="module">
+    import mermaid from 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+    mermaid.initialize({ startOnLoad: true, theme: 'default', flowchart: { curve: 'basis' } });
+    window.downloadSvg = () => {
+      const svg = document.querySelector('.mermaid svg');
+      if (!svg) return alert('Diagram not ready yet.');
+      const blob = new Blob([new XMLSerializer().serializeToString(svg)], { type: 'image/svg+xml' });
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob); a.download = 'fems-architecture.svg'; a.click();
+      URL.revokeObjectURL(a.href);
+    };
+  </script>
+</body>
+</html>

@@ -3,20 +3,23 @@ const { ApiError, asyncHandler } = require('@fems/shared');
 const reports = require('./reportService');
 const { toCsv, toPdf } = require('./exporters');
 
-const getInventory = asyncHandler(async (_req, res) => res.json(await reports.inventoryReport()));
-const getInspections = asyncHandler(async (_req, res) => res.json(await reports.inspectionReport()));
+/** Plain users see only their own data; admins/inspectors see the whole system. */
+const scopeOf = (req) => (req.user.role === 'user' ? { userId: req.user.id } : {});
+
+const getInventory = asyncHandler(async (req, res) => res.json(await reports.inventoryReport(scopeOf(req))));
+const getInspections = asyncHandler(async (req, res) => res.json(await reports.inspectionReport(scopeOf(req))));
 const getCompliance = asyncHandler(async (req, res) =>
-  res.json(await reports.complianceReport(Number(req.query.upcomingDays) || 30)));
-const getMaintenance = asyncHandler(async (_req, res) => res.json(await reports.maintenanceReport()));
-const getSummary = asyncHandler(async (_req, res) => res.json(await reports.dashboardSummary()));
+  res.json(await reports.complianceReport(scopeOf(req), Number(req.query.upcomingDays) || 30)));
+const getMaintenance = asyncHandler(async (req, res) => res.json(await reports.maintenanceReport(scopeOf(req))));
+const getSummary = asyncHandler(async (req, res) => res.json(await reports.dashboardSummary(scopeOf(req))));
 
 /**
  * Flatten each report into (csvRows, pdfSections) for export.
  */
-async function buildExport(type) {
+async function buildExport(type, scope) {
   switch (type) {
     case 'inventory': {
-      const r = await reports.inventoryReport();
+      const r = await reports.inventoryReport(scope);
       const csvRows = [
         ...r.byStatus.map((x) => ({ dimension: 'status', key: x.status, count: x.count })),
         ...r.byType.map((x) => ({ dimension: 'type', key: x.type, count: x.count })),
@@ -35,7 +38,7 @@ async function buildExport(type) {
       };
     }
     case 'inspections': {
-      const r = await reports.inspectionReport();
+      const r = await reports.inspectionReport(scope);
       return {
         title: 'Inspection Report',
         subtitle: `Pending: ${r.counts.pending}  Completed: ${r.counts.completed}  Overdue: ${r.counts.overdue}`,
@@ -44,7 +47,7 @@ async function buildExport(type) {
       };
     }
     case 'compliance': {
-      const r = await reports.complianceReport();
+      const r = await reports.complianceReport(scope);
       return {
         title: 'Compliance Report',
         subtitle: `Compliance: ${r.compliancePercentage}%  Expired: ${r.expiredCount}  Upcoming: ${r.upcomingCount}`,
@@ -57,7 +60,7 @@ async function buildExport(type) {
       };
     }
     case 'maintenance': {
-      const r = await reports.maintenanceReport();
+      const r = await reports.maintenanceReport(scope);
       return {
         title: 'Maintenance Report',
         subtitle: `Total records: ${r.totalRecords}`,
@@ -77,7 +80,7 @@ async function buildExport(type) {
 const exportReport = asyncHandler(async (req, res) => {
   const { type } = req.params;
   const format = (req.query.format || 'pdf').toLowerCase();
-  const data = await buildExport(type);
+  const data = await buildExport(type, scopeOf(req));
   const stamp = new Date().toISOString().slice(0, 10);
 
   if (format === 'csv') {

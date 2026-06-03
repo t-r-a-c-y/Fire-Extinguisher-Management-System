@@ -7,7 +7,7 @@ This manual covers day-to-day use of the FEMS web application.
 | Role | Can do |
 |---|---|
 | **Admin** | Everything: manage users, manage extinguishers, schedule & complete inspections, log maintenance, view all reports, send notifications |
-| **Inspector** | Manage extinguishers, conduct & complete inspections, log maintenance, schedule inspections, view reports |
+| **Inspector** | Update extinguishers (cannot add/delete), conduct & complete inspections, log maintenance, schedule inspections, view reports |
 | **User** | View extinguisher status, schedule inspections, view inspection history & reports |
 
 ## 2. Getting started
@@ -34,7 +34,7 @@ This manual covers day-to-day use of the FEMS web application.
 2. Enter your email; a reset token is issued (shown on screen in the demo).
 3. Paste the token and set a new password.
 
-## 3. Dashboard
+## 3. Dashboard (role-scoped)
 
 Shows live KPIs:
 - Total extinguishers and breakdown by status/type.
@@ -42,14 +42,37 @@ Shows live KPIs:
 - Compliance: **% compliant**, **expired**, **upcoming expirations**.
 - Recent maintenance activity.
 
+**What you see depends on your role:**
+- **Admin / Inspector** — figures for the **whole system**.
+- **User** — only **your own** activity (extinguishers you added, inspections
+  you scheduled). A brand-new user sees all zeros until they add something.
+
+> Tip: use the 🌙 / ☀️ button in the top bar to switch between **light and dark
+> mode** (your choice is remembered). On small screens, tap the **☰** icon to
+> open the sidebar.
+
 ## 4. Fire extinguishers
 
 - **List** — search by serial/location, filter by status or type.
-- **View** — click a row to see full details and its inspection/maintenance history.
-- **Add** (admin/inspector) — Serial number, Location, Type (Water/CO₂/Foam/Dry Chemical),
-  Size (2.5/5/9/12 lb), Installation date, Expiry date, Status.
+- **View details** — click a serial number (or **View**) to open its detail page
+  with full information plus its **inspection and maintenance history**, including
+  the **inspector's notes/result**.
+- **Add** (**admin only** — inspectors cannot add) — Serial number, Location,
+  Type (Water/CO₂/Foam/Dry Chemical), Size (2.5/5/9/12 lb), Installation date,
+  Expiry date, Status.
 - **Edit** (admin/inspector) — update any field.
-- **Delete** (admin).
+- **Delete** (admin) — a confirmation dialog asks you to confirm.
+
+### Date rules (enforced)
+- **Installation date** cannot be in the future.
+- **Expiry date must be after the installation date.** If it is on/before the
+  installation date the record is rejected with a clear message.
+- **Inspection date** cannot be in the past.
+
+### Requesting help (any user)
+On an extinguisher's detail page, click **Send a request** to notify admins and
+inspectors — e.g. *ask them to update the details/location*, *request an
+inspection*, or *request the purchase of a similar unit*.
 
 ## 5. Inspections
 
@@ -80,8 +103,12 @@ Click **Export PDF** or **Export CSV** on any report.
 
 ## 8. Notifications
 
-The bell icon shows unread notifications (inspection assigned/completed,
-compliance alerts). Click to mark as read, or **Mark all read**.
+- The **bell icon** shows a quick dropdown of recent unread notifications.
+- The dedicated **Notifications page** (sidebar → Notifications) lists everything,
+  with an **All / Unread** filter, **Mark read** per item, and **Mark all read**.
+- Notifications are generated automatically when you **create / update / delete**
+  an extinguisher, **schedule or complete** an inspection, **log maintenance**,
+  and when a user **sends a request**.
 
 ## 9. Profile
 

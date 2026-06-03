@@ -8,8 +8,13 @@ const router = Router();
 router.get('/extinguishers', authenticate, c.list);
 router.get('/extinguishers/:id', authenticate, c.getById);
 
-// Admin + inspector can create / update.
-router.post('/extinguishers', authenticate, requireRole('admin', 'inspector'), c.create);
+// Any authenticated user can send a request about an extinguisher.
+router.post('/extinguishers/:id/request', authenticate, c.requestAction);
+
+// Only admin can create (inspectors may NOT add extinguishers).
+router.post('/extinguishers', authenticate, requireRole('admin'), c.create);
+
+// Admin + inspector can update.
 router.patch('/extinguishers/:id', authenticate, requireRole('admin', 'inspector'), c.update);
 
 // Only admin can delete.

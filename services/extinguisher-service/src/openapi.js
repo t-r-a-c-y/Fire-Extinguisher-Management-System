@@ -42,7 +42,7 @@ module.exports = {
         responses: { 200: { description: 'List' } },
       },
       post: {
-        tags: ['Extinguishers'], summary: 'Register a new extinguisher (admin/inspector)',
+        tags: ['Extinguishers'], summary: 'Register a new extinguisher (admin only)',
         requestBody: { required: true, content: { 'application/json': { schema: {
           type: 'object',
           required: ['serialNumber', 'location', 'type', 'size', 'installationDate', 'expiryDate'],
@@ -69,6 +69,21 @@ module.exports = {
       delete: { tags: ['Extinguishers'], summary: 'Delete extinguisher (admin)',
         parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
         responses: { 204: { description: 'Deleted' } } },
+    },
+    '/extinguishers/{id}/request': {
+      post: {
+        tags: ['Extinguishers'],
+        summary: 'Send a request about an extinguisher (any user → notifies admins/inspectors)',
+        parameters: [{ name: 'id', in: 'path', required: true, schema: { type: 'string' } }],
+        requestBody: { required: true, content: { 'application/json': { schema: {
+          type: 'object', required: ['kind'],
+          properties: {
+            kind: { type: 'string', enum: ['update_details', 'purchase', 'inspection', 'other'] },
+            message: { type: 'string' },
+          },
+        } } } },
+        responses: { 201: { description: 'Request sent' } },
+      },
     },
   },
 };

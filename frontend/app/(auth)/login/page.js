@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
-import { Alert, Field } from '@/components/ui';
+import { Alert, Field, PasswordInput } from '@/components/ui';
 
 export default function LoginPage() {
   const { login } = useAuth();
@@ -41,7 +41,7 @@ export default function LoginPage() {
             <input className="input" type="email" value={email} onChange={(e) => setEmail(e.target.value)} required />
           </Field>
           <Field label="Password">
-            <input className="input" type="password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+            <PasswordInput value={password} onChange={(e) => setPassword(e.target.value)} required autoComplete="current-password" />
           </Field>
           <button className="btn-primary w-full" disabled={busy}>{busy ? 'Signing in…' : 'Sign in'}</button>
         </form>
@@ -49,7 +49,7 @@ export default function LoginPage() {
           <Link className="text-brand-600 hover:underline" href="/forgot-password">Forgot password?</Link>
           <Link className="text-brand-600 hover:underline" href="/register">Create account</Link>
         </div>
-        <div className="mt-6 rounded-md bg-slate-50 p-3 text-xs text-slate-500">
+        <div className="mt-6 rounded-md surface-muted p-3 text-xs text-muted">
           <p className="font-medium text-slate-600">Demo accounts (password: Password123!)</p>
           <p>admin@tzw.com · inspector@tzw.com · user@tzw.com</p>
         </div>

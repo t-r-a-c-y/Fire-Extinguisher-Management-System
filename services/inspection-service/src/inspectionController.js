@@ -1,5 +1,9 @@
 /** Inspection scheduling + completion. */
-const { query, withTransaction, ApiError, asyncHandler, validateBody } = require('@fems/shared');
+const { query, withTransaction, ApiError, asyncHandler, validateBody, insertNotification } = require('@fems/shared');
+
+/** Date-only comparison helpers. */
+const dayOnly = (d) => new Date(`${String(d).slice(0, 10)}T00:00:00Z`).getTime();
+const today = () => dayOnly(new Date().toISOString());
 
 /** Promote any pending inspection whose date has passed to 'overdue'. */
 async function markOverdue() {
@@ -39,8 +43,11 @@ const schedule = asyncHandler(async (req, res) => {
     assignedTo: { type: 'uuid' },
     notes: {},
   });
+  if (dayOnly(data.scheduledDate) < today()) {
+    throw ApiError.badRequest('Inspection date cannot be in the past.');
+  }
 
-  const ext = await query('SELECT id FROM fire_extinguishers WHERE id = $1', [data.extinguisherId]);
+  const ext = await query('SELECT id, serial_number FROM fire_extinguishers WHERE id = $1', [data.extinguisherId]);
   if (!ext.rowCount) throw ApiError.badRequest('Extinguisher does not exist');
 
   const created = await withTransaction(async (client) => {
@@ -63,6 +70,15 @@ const schedule = asyncHandler(async (req, res) => {
          inspection.id]
       );
     }
+    // Confirm to the person who scheduled it.
+    await insertNotification({
+      userId: req.user.id,
+      type: 'inspection',
+      title: 'Inspection scheduled',
+      message: `You scheduled an inspection for ${ext.rows[0].serial_number} on ${data.scheduledDate}.`,
+      relatedEntity: 'inspection',
+      relatedId: inspection.id,
+    }, client);
     return inspection;
   });
 

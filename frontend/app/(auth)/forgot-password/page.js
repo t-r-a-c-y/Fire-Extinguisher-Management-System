@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { Alert, Field } from '@/components/ui';
+import { Alert, Field, PasswordInput } from '@/components/ui';
 
 export default function ForgotPasswordPage() {
   const [email, setEmail] = useState('');
@@ -47,7 +47,7 @@ export default function ForgotPasswordPage() {
 
           <form onSubmit={resetPassword} className="space-y-3 border-t border-slate-200 pt-6">
             <Field label="Reset token"><input className="input" value={token} onChange={(e) => setToken(e.target.value)} required /></Field>
-            <Field label="New password"><input className="input" type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required /></Field>
+            <Field label="New password"><PasswordInput value={newPassword} onChange={(e) => setNewPassword(e.target.value)} required autoComplete="new-password" /></Field>
             <button className="btn-primary w-full">Set new password</button>
           </form>
         </div>

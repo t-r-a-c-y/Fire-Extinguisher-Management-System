@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { Alert, Field } from '@/components/ui';
+import { Alert, Field, PasswordInput } from '@/components/ui';
 
 export default function RegisterPage() {
   const { login } = useAuth();
@@ -41,7 +41,7 @@ export default function RegisterPage() {
             <Field label="Last name"><input className="input" value={form.lastName} onChange={set('lastName')} required /></Field>
           </div>
           <Field label="Email"><input className="input" type="email" value={form.email} onChange={set('email')} required /></Field>
-          <Field label="Password"><input className="input" type="password" value={form.password} onChange={set('password')} required /></Field>
+          <Field label="Password"><PasswordInput value={form.password} onChange={set('password')} required autoComplete="new-password" /></Field>
           <p className="text-xs text-slate-400">Min 8 characters, including a letter and a number.</p>
           <button className="btn-primary w-full" disabled={busy}>{busy ? 'Creating…' : 'Create account'}</button>
         </form>

@@ -19,7 +19,11 @@ export default function DashboardPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-bold">Dashboard</h1>
-        <p className="text-sm text-slate-500">Real-time overview of fire safety equipment.</p>
+        <p className="text-sm text-muted">
+          {data.scope === 'personal'
+            ? 'Your activity — extinguishers you added, inspections you scheduled.'
+            : 'Real-time overview of all fire safety equipment in the system.'}
+        </p>
       </div>
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,7 +57,7 @@ export default function DashboardPage() {
               <div key={t.type} className="flex items-center justify-between">
                 <span className="text-sm capitalize">{t.type.replace('_', ' ')}</span>
                 <div className="flex items-center gap-2">
-                  <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-100">
+                  <div className="h-2 w-32 overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div className="h-full bg-brand-500" style={{ width: `${(t.count / data.totalExtinguishers) * 100}%` }} />
                   </div>
                   <span className="w-6 text-right text-sm font-medium">{t.count}</span>
@@ -67,7 +71,7 @@ export default function DashboardPage() {
           <h2 className="mb-4 font-semibold">Inspection status</h2>
           <div className="grid grid-cols-2 gap-3">
             {Object.entries(data.inspections).map(([k, v]) => (
-              <div key={k} className="rounded-md bg-slate-50 p-3">
+              <div key={k} className="rounded-md surface-muted p-3">
                 <div className="text-xs uppercase text-slate-400">{k}</div>
                 <div className="text-2xl font-semibold">{v}</div>
               </div>
@@ -80,7 +84,7 @@ export default function DashboardPage() {
           <div className="space-y-2">
             {data.maintenance.recent.length === 0 && <p className="text-sm text-slate-400">No recent maintenance.</p>}
             {data.maintenance.recent.map((m) => (
-              <div key={m.id} className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm last:border-0">
+              <div key={m.id} className="flex items-center justify-between border-b border-slate-100 pb-2 text-sm last:border-0 dark:border-slate-800">
                 <div>
                   <span className="font-medium">{m.serial_number}</span>
                   <span className="text-slate-500"> — {m.action_taken}</span>

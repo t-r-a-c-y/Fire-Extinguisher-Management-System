@@ -4,7 +4,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { StatusBadge, Spinner, EmptyState, Modal, Field, Alert } from '@/components/ui';
+import { StatusBadge, Spinner, EmptyState, Modal, Field, Alert, ConfirmDialog } from '@/components/ui';
 
 const ROLES = ['admin', 'inspector', 'user'];
 const empty = { firstName: '', lastName: '', email: '', password: '', role: 'user' };
@@ -17,6 +17,7 @@ export default function UsersPage() {
   const [form, setForm] = useState(empty);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
 
   // Guard: only admins.
   useEffect(() => { if (user && user.role !== 'admin') router.replace('/dashboard'); }, [user, router]);
@@ -42,9 +43,10 @@ export default function UsersPage() {
     } finally { setBusy(false); }
   }
 
-  async function remove(u) {
-    if (!confirm(`Delete user ${u.email}?`)) return;
-    try { await api.del(`/users/${u.id}`); load(); } catch (err) { alert(err.message); }
+  async function confirmDelete() {
+    setBusy(true);
+    try { await api.del(`/users/${toDelete.id}`); setToDelete(null); load(); }
+    catch (err) { alert(err.message); } finally { setBusy(false); }
   }
 
   return (
@@ -61,19 +63,19 @@ export default function UsersPage() {
         {!items ? <Spinner /> : items.length === 0 ? <EmptyState>No users.</EmptyState> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+              <thead className="table-head text-left text-xs uppercase">
                 <tr><th className="px-4 py-3">Name</th><th className="px-4 py-3">Email</th><th className="px-4 py-3">Role</th><th className="px-4 py-3">Active</th><th className="px-4 py-3 text-right">Actions</th></tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-rows">
                 {items.map((u) => (
-                  <tr key={u.id} className="hover:bg-slate-50">
+                  <tr key={u.id} className="row-hover">
                     <td className="px-4 py-3 font-medium">{u.firstName} {u.lastName}</td>
                     <td className="px-4 py-3">{u.email}</td>
                     <td className="px-4 py-3"><StatusBadge value={u.role} /></td>
                     <td className="px-4 py-3">{u.isActive ? '✓' : '✗'}</td>
                     <td className="px-4 py-3 text-right">
                       <button className="btn-ghost px-2 py-1 text-xs" onClick={() => openEdit(u)}>Edit</button>
-                      <button className="btn-ghost px-2 py-1 text-xs text-red-600" onClick={() => remove(u)}>Delete</button>
+                      <button className="btn-ghost px-2 py-1 text-xs text-red-600" onClick={() => setToDelete(u)}>Delete</button>
                     </td>
                   </tr>
                 ))}
@@ -108,6 +110,15 @@ export default function UsersPage() {
           )}
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={!!toDelete}
+        title="Delete user?"
+        message={toDelete ? `This permanently removes ${toDelete.email}.` : ''}
+        busy={busy}
+        onConfirm={confirmDelete}
+        onCancel={() => setToDelete(null)}
+      />
     </div>
   );
 }

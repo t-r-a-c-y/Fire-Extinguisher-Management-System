@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { useAuth } from '@/lib/auth';
+import { useTheme } from '@/lib/theme';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/ui';
 
@@ -13,6 +14,7 @@ const NAV = [
   { href: '/inspections', label: 'Inspections', icon: '🗓️', roles: ['admin', 'inspector', 'user'] },
   { href: '/maintenance', label: 'Maintenance', icon: '🔧', roles: ['admin', 'inspector', 'user'] },
   { href: '/reports', label: 'Reports', icon: '📑', roles: ['admin', 'inspector', 'user'] },
+  { href: '/notifications', label: 'Notifications', icon: '🔔', roles: ['admin', 'inspector', 'user'] },
   { href: '/users', label: 'Users', icon: '👥', roles: ['admin'] },
   { href: '/profile', label: 'Profile', icon: '👤', roles: ['admin', 'inspector', 'user'] },
 ];
@@ -26,14 +28,11 @@ function NotificationBell() {
   }
   useEffect(() => { load(); const t = setInterval(load, 30000); return () => clearInterval(t); }, []);
 
-  async function markAll() {
-    await api.post('/notifications/read-all');
-    load();
-  }
+  async function markAll() { await api.post('/notifications/read-all'); load(); }
 
   return (
     <div className="relative">
-      <button className="btn-ghost relative px-2 py-1" onClick={() => setOpen(!open)}>
+      <button className="btn-ghost relative px-2 py-1" onClick={() => setOpen(!open)} aria-label="Notifications">
         🔔
         {data.unread > 0 && (
           <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] text-white">
@@ -48,17 +47,54 @@ function NotificationBell() {
             <button className="text-xs text-brand-600 hover:underline" onClick={markAll}>Mark all read</button>
           </div>
           <div className="max-h-80 space-y-2 overflow-auto">
-            {data.notifications.length === 0 && <p className="py-4 text-center text-xs text-slate-400">No notifications</p>}
-            {data.notifications.map((n) => (
-              <div key={n.id} className={`rounded-md border p-2 text-sm ${n.isRead ? 'border-slate-100' : 'border-brand-200 bg-brand-50'}`}>
+            {data.notifications.length === 0 && <p className="py-4 text-center text-xs text-muted">No notifications</p>}
+            {data.notifications.slice(0, 8).map((n) => (
+              <div key={n.id} className={`rounded-md border p-2 text-sm ${n.isRead ? 'border-slate-100 dark:border-slate-800' : 'border-brand-200 bg-brand-50 dark:border-brand-800 dark:bg-brand-900/20'}`}>
                 <div className="font-medium">{n.title}</div>
-                <div className="text-xs text-slate-500">{n.message}</div>
+                <div className="text-xs text-muted">{n.message}</div>
               </div>
             ))}
           </div>
+          <Link href="/notifications" className="mt-2 block rounded-md py-1.5 text-center text-xs text-brand-600 hover:underline" onClick={() => setOpen(false)}>
+            View all notifications
+          </Link>
         </div>
       )}
     </div>
+  );
+}
+
+function ThemeToggle() {
+  const { theme, toggle } = useTheme();
+  return (
+    <button className="btn-ghost px-2 py-1" onClick={toggle} aria-label="Toggle theme" title="Toggle light/dark">
+      {theme === 'dark' ? '☀️' : '🌙'}
+    </button>
+  );
+}
+
+function SidebarContent({ nav, pathname, onNavigate }) {
+  return (
+    <>
+      <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4 dark:border-slate-800">
+        <span className="text-2xl">🔥</span>
+        <div>
+          <div className="font-bold text-brand-700 dark:text-brand-500">TZW FEMS</div>
+          <div className="text-xs text-muted">Fire Safety</div>
+        </div>
+      </div>
+      <nav className="flex-1 space-y-1 p-3">
+        {nav.map((n) => {
+          const active = pathname === n.href || pathname.startsWith(n.href + '/');
+          return (
+            <Link key={n.href} href={n.href} onClick={onNavigate}
+              className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm ${active ? 'bg-brand-50 font-medium text-brand-700 dark:bg-brand-900/30 dark:text-brand-400' : 'text-slate-600 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-800'}`}>
+              <span>{n.icon}</span>{n.label}
+            </Link>
+          );
+        })}
+      </nav>
+    </>
   );
 }
 
@@ -66,70 +102,61 @@ export default function AppShell({ children }) {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
   const router = useRouter();
+  const [drawer, setDrawer] = useState(false);
 
   useEffect(() => {
     if (!loading && !user) router.replace('/login');
   }, [user, loading, router]);
 
+  // Close the mobile drawer on route change.
+  useEffect(() => { setDrawer(false); }, [pathname]);
+
   if (loading || !user) {
-    return <div className="flex min-h-screen items-center justify-center text-slate-400">Loading…</div>;
+    return <div className="flex min-h-screen items-center justify-center text-muted">Loading…</div>;
   }
 
   const nav = NAV.filter((n) => n.roles.includes(user.role));
 
   return (
     <div className="flex min-h-screen">
-      {/* Sidebar */}
-      <aside className="hidden w-60 flex-col border-r border-slate-200 bg-white md:flex">
-        <div className="flex items-center gap-2 border-b border-slate-200 px-5 py-4">
-          <span className="text-2xl">🔥</span>
-          <div>
-            <div className="font-bold text-brand-700">TZW FEMS</div>
-            <div className="text-xs text-slate-400">Fire Safety</div>
-          </div>
-        </div>
-        <nav className="flex-1 space-y-1 p-3">
-          {nav.map((n) => {
-            const active = pathname === n.href;
-            return (
-              <Link key={n.href} href={n.href}
-                className={`flex items-center gap-3 rounded-md px-3 py-2 text-sm ${active ? 'bg-brand-50 font-medium text-brand-700' : 'text-slate-600 hover:bg-slate-100'}`}>
-                <span>{n.icon}</span>{n.label}
-              </Link>
-            );
-          })}
-        </nav>
+      {/* Desktop sidebar */}
+      <aside className="hidden w-60 flex-col border-r border-slate-200 bg-white md:flex dark:border-slate-800 dark:bg-slate-900">
+        <SidebarContent nav={nav} pathname={pathname} />
       </aside>
+
+      {/* Mobile drawer */}
+      {drawer && (
+        <div className="fixed inset-0 z-50 md:hidden">
+          <div className="absolute inset-0 bg-black/50" onClick={() => setDrawer(false)} />
+          <aside className="absolute left-0 top-0 flex h-full w-64 flex-col bg-white dark:bg-slate-900">
+            <SidebarContent nav={nav} pathname={pathname} onNavigate={() => setDrawer(false)} />
+          </aside>
+        </div>
+      )}
 
       {/* Main */}
       <div className="flex flex-1 flex-col">
-        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-6 py-3">
-          <div className="flex items-center gap-2 md:hidden">
-            <span className="text-xl">🔥</span><span className="font-bold text-brand-700">FEMS</span>
+        <header className="flex items-center justify-between border-b border-slate-200 bg-white px-4 py-3 dark:border-slate-800 dark:bg-slate-900 sm:px-6">
+          <div className="flex items-center gap-2">
+            <button className="btn-ghost px-2 py-1 md:hidden" onClick={() => setDrawer(true)} aria-label="Open menu">
+              ☰
+            </button>
+            <div className="flex items-center gap-2 md:hidden">
+              <span className="text-xl">🔥</span><span className="font-bold text-brand-700 dark:text-brand-500">FEMS</span>
+            </div>
           </div>
-          <div className="flex-1" />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 sm:gap-4">
+            <ThemeToggle />
             <NotificationBell />
-            <div className="flex items-center gap-2">
-              <div className="text-right">
-                <div className="text-sm font-medium">{user.firstName} {user.lastName}</div>
-                <div className="text-xs"><StatusBadge value={user.role} /></div>
-              </div>
+            <div className="hidden text-right sm:block">
+              <div className="text-sm font-medium">{user.firstName} {user.lastName}</div>
+              <div className="text-xs"><StatusBadge value={user.role} /></div>
             </div>
             <button className="btn-secondary py-1.5" onClick={logout}>Logout</button>
           </div>
         </header>
 
-        {/* Mobile nav */}
-        <nav className="flex gap-1 overflow-x-auto border-b border-slate-200 bg-white px-3 py-2 md:hidden">
-          {nav.map((n) => (
-            <Link key={n.href} href={n.href} className={`whitespace-nowrap rounded-md px-3 py-1.5 text-sm ${pathname === n.href ? 'bg-brand-50 text-brand-700' : 'text-slate-600'}`}>
-              {n.icon} {n.label}
-            </Link>
-          ))}
-        </nav>
-
-        <main className="flex-1 p-6">{children}</main>
+        <main className="flex-1 p-4 sm:p-6">{children}</main>
       </div>
     </div>
   );

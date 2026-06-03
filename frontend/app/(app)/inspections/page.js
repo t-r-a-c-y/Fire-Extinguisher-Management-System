@@ -5,6 +5,8 @@ import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
 import { StatusBadge, Spinner, EmptyState, Modal, Field, Alert } from '@/components/ui';
 
+const todayStr = () => new Date().toISOString().slice(0, 10);
+
 export default function InspectionsPage() {
   const { user } = useAuth();
   const canComplete = ['admin', 'inspector'].includes(user.role);
@@ -71,21 +73,23 @@ export default function InspectionsPage() {
         {!items ? <Spinner /> : items.length === 0 ? <EmptyState>No inspections.</EmptyState> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+              <thead className="table-head text-left text-xs uppercase">
                 <tr>
                   <th className="px-4 py-3">Extinguisher</th><th className="px-4 py-3">Location</th>
                   <th className="px-4 py-3">Scheduled</th><th className="px-4 py-3">Status</th>
-                  <th className="px-4 py-3">Result</th><th className="px-4 py-3 text-right">Actions</th>
+                  <th className="px-4 py-3">Result</th><th className="px-4 py-3">Inspector notes</th>
+                  <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-rows">
                 {items.map((i) => (
-                  <tr key={i.id} className="hover:bg-slate-50">
+                  <tr key={i.id} className="row-hover">
                     <td className="px-4 py-3 font-medium">{i.serialNumber}</td>
                     <td className="px-4 py-3">{i.location}</td>
                     <td className="px-4 py-3">{i.scheduledDate?.slice(0, 10)} {i.scheduledTime?.slice(0, 5) || ''}</td>
                     <td className="px-4 py-3"><StatusBadge value={i.status} /></td>
                     <td className="px-4 py-3">{i.result ? <StatusBadge value={i.result} /> : '—'}</td>
+                    <td className="px-4 py-3 max-w-[16rem] truncate text-muted" title={i.notes || ''}>{i.notes || '—'}</td>
                     <td className="px-4 py-3 text-right">
                       {canComplete && i.status !== 'completed' && i.status !== 'cancelled' && (
                         <button className="btn-ghost px-2 py-1 text-xs text-brand-600" onClick={() => { setError(''); setCompleteModal(i); }}>Complete</button>
@@ -114,7 +118,7 @@ export default function InspectionsPage() {
             </select>
           </Field>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Date"><input className="input" type="date" value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} required /></Field>
+            <Field label="Date"><input className="input" type="date" min={todayStr()} value={form.scheduledDate} onChange={(e) => setForm({ ...form, scheduledDate: e.target.value })} required /></Field>
             <Field label="Time"><input className="input" type="time" value={form.scheduledTime} onChange={(e) => setForm({ ...form, scheduledTime: e.target.value })} /></Field>
           </div>
           <Field label="Notes"><textarea className="input" rows={2} value={form.notes} onChange={(e) => setForm({ ...form, notes: e.target.value })} /></Field>

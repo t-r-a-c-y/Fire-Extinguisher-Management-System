@@ -1,27 +1,31 @@
 'use client';
 
 import { useEffect, useState, useCallback } from 'react';
+import Link from 'next/link';
 import { api } from '@/lib/api';
 import { useAuth } from '@/lib/auth';
-import { StatusBadge, Spinner, EmptyState, Modal, Field, Alert } from '@/components/ui';
+import { StatusBadge, Spinner, EmptyState, Modal, Field, Alert, ConfirmDialog } from '@/components/ui';
 
 const TYPES = ['water', 'co2', 'foam', 'dry_chemical'];
 const SIZES = ['2.5lb', '5lb', '9lb', '12lb'];
 const STATUSES = ['active', 'maintenance', 'expired', 'decommissioned'];
+const todayStr = () => new Date().toISOString().slice(0, 10);
 
 const empty = { serialNumber: '', location: '', type: 'co2', size: '5lb', installationDate: '', expiryDate: '', status: 'active' };
 
 export default function ExtinguishersPage() {
   const { user } = useAuth();
+  const canCreate = user.role === 'admin';                    // #14: inspectors cannot add
   const canEdit = ['admin', 'inspector'].includes(user.role);
   const canDelete = user.role === 'admin';
 
   const [items, setItems] = useState(null);
   const [filters, setFilters] = useState({ q: '', status: '', type: '' });
-  const [modal, setModal] = useState(null); // { mode: 'create'|'edit', data }
+  const [modal, setModal] = useState(null);
   const [form, setForm] = useState(empty);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [toDelete, setToDelete] = useState(null);
 
   const load = useCallback(async () => {
     const qs = new URLSearchParams();
@@ -43,8 +47,17 @@ export default function ExtinguishersPage() {
     setError(''); setModal({ mode: 'edit', id: x.id });
   }
 
+  // Client-side date checks mirror the backend rules for instant feedback.
+  function dateError() {
+    if (form.installationDate && form.installationDate > todayStr()) return 'Installation date cannot be in the future.';
+    if (form.installationDate && form.expiryDate && form.expiryDate <= form.installationDate) return 'Expiry date must be after the installation date.';
+    return '';
+  }
+
   async function save(e) {
     e.preventDefault();
+    const de = dateError();
+    if (de) { setError(de); return; }
     setBusy(true); setError('');
     try {
       if (modal.mode === 'create') await api.post('/extinguishers', form);
@@ -55,10 +68,10 @@ export default function ExtinguishersPage() {
     } finally { setBusy(false); }
   }
 
-  async function remove(x) {
-    if (!confirm(`Delete extinguisher ${x.serialNumber}?`)) return;
-    try { await api.del(`/extinguishers/${x.id}`); load(); }
-    catch (err) { alert(err.message); }
+  async function confirmDelete() {
+    setBusy(true);
+    try { await api.del(`/extinguishers/${toDelete.id}`); setToDelete(null); load(); }
+    catch (err) { alert(err.message); } finally { setBusy(false); }
   }
 
   const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
@@ -68,9 +81,9 @@ export default function ExtinguishersPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Fire Extinguishers</h1>
-          <p className="text-sm text-slate-500">{items ? `${items.length} record(s)` : ''}</p>
+          <p className="text-sm text-muted">{items ? `${items.length} record(s)` : ''}</p>
         </div>
-        {canEdit && <button className="btn-primary" onClick={openCreate}>+ Add extinguisher</button>}
+        {canCreate && <button className="btn-primary" onClick={openCreate}>+ Add extinguisher</button>}
       </div>
 
       <div className="card flex flex-wrap items-end gap-3 p-4">
@@ -91,7 +104,7 @@ export default function ExtinguishersPage() {
         {!items ? <Spinner /> : items.length === 0 ? <EmptyState>No extinguishers found.</EmptyState> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+              <thead className="table-head text-left text-xs uppercase">
                 <tr>
                   <th className="px-4 py-3">Serial</th><th className="px-4 py-3">Location</th>
                   <th className="px-4 py-3">Type</th><th className="px-4 py-3">Size</th>
@@ -99,18 +112,21 @@ export default function ExtinguishersPage() {
                   <th className="px-4 py-3 text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-rows">
                 {items.map((x) => (
-                  <tr key={x.id} className="hover:bg-slate-50">
-                    <td className="px-4 py-3 font-medium">{x.serialNumber}</td>
+                  <tr key={x.id} className="row-hover">
+                    <td className="px-4 py-3 font-medium">
+                      <Link href={`/extinguishers/${x.id}`} className="text-brand-700 hover:underline dark:text-brand-400">{x.serialNumber}</Link>
+                    </td>
                     <td className="px-4 py-3">{x.location}</td>
                     <td className="px-4 py-3 capitalize">{x.type.replace('_', ' ')}</td>
                     <td className="px-4 py-3">{x.size}</td>
                     <td className="px-4 py-3">{x.expiryDate?.slice(0, 10)}</td>
                     <td className="px-4 py-3"><StatusBadge value={x.status} /></td>
-                    <td className="px-4 py-3 text-right">
+                    <td className="px-4 py-3 text-right whitespace-nowrap">
+                      <Link href={`/extinguishers/${x.id}`} className="btn-ghost px-2 py-1 text-xs">View</Link>
                       {canEdit && <button className="btn-ghost px-2 py-1 text-xs" onClick={() => openEdit(x)}>Edit</button>}
-                      {canDelete && <button className="btn-ghost px-2 py-1 text-xs text-red-600" onClick={() => remove(x)}>Delete</button>}
+                      {canDelete && <button className="btn-ghost px-2 py-1 text-xs text-red-600" onClick={() => setToDelete(x)}>Delete</button>}
                     </td>
                   </tr>
                 ))}
@@ -135,12 +151,25 @@ export default function ExtinguishersPage() {
             <Field label="Size"><select className="input" value={form.size} onChange={set('size')}>{SIZES.map((s) => <option key={s} value={s}>{s}</option>)}</select></Field>
           </div>
           <div className="grid grid-cols-2 gap-3">
-            <Field label="Installation date"><input className="input" type="date" value={form.installationDate} onChange={set('installationDate')} required /></Field>
-            <Field label="Expiry date"><input className="input" type="date" value={form.expiryDate} onChange={set('expiryDate')} required /></Field>
+            <Field label="Installation date">
+              <input className="input" type="date" max={todayStr()} value={form.installationDate} onChange={set('installationDate')} required />
+            </Field>
+            <Field label="Expiry date">
+              <input className="input" type="date" min={form.installationDate || undefined} value={form.expiryDate} onChange={set('expiryDate')} required />
+            </Field>
           </div>
           <Field label="Status"><select className="input" value={form.status} onChange={set('status')}>{STATUSES.map((s) => <option key={s} value={s}>{s}</option>)}</select></Field>
         </form>
       </Modal>
+
+      <ConfirmDialog
+        open={!!toDelete}
+        title="Delete extinguisher?"
+        message={toDelete ? `This permanently removes ${toDelete.serialNumber} and its inspection/maintenance history.` : ''}
+        busy={busy}
+        onConfirm={confirmDelete}
+        onCancel={() => setToDelete(null)}
+      />
     </div>
   );
 }

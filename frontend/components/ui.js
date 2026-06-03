@@ -1,6 +1,64 @@
 'use client';
 
+import { useState } from 'react';
+
 /** Small reusable UI primitives. */
+
+/** Password input with a show/hide eye toggle. */
+export function PasswordInput({ value, onChange, placeholder, required, autoComplete }) {
+  const [show, setShow] = useState(false);
+  return (
+    <div className="relative">
+      <input
+        className="input pr-10"
+        type={show ? 'text' : 'password'}
+        value={value}
+        onChange={onChange}
+        placeholder={placeholder}
+        required={required}
+        autoComplete={autoComplete}
+      />
+      <button
+        type="button"
+        onClick={() => setShow((s) => !s)}
+        aria-label={show ? 'Hide password' : 'Show password'}
+        className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+      >
+        {show ? '🙈' : '👁️'}
+      </button>
+    </div>
+  );
+}
+
+/** Confirmation dialog (replaces window.confirm). */
+export function ConfirmDialog({ open, title = 'Are you sure?', message, confirmLabel = 'Delete', danger = true, onConfirm, onCancel, busy }) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/50 p-4" onClick={onCancel}>
+      <div className="card w-full max-w-sm p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="mb-3 flex items-start gap-3">
+          <div className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${danger ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
+            {danger ? '🗑️' : '❓'}
+          </div>
+          <div>
+            <h3 className="text-base font-semibold">{title}</h3>
+            {message && <p className="mt-1 text-sm text-muted">{message}</p>}
+          </div>
+        </div>
+        <div className="mt-5 flex justify-end gap-2">
+          <button className="btn-secondary" onClick={onCancel} disabled={busy}>Cancel</button>
+          <button
+            className={`btn ${danger ? 'bg-red-600 text-white hover:bg-red-700' : 'btn-primary'}`}
+            onClick={onConfirm}
+            disabled={busy}
+          >
+            {busy ? 'Working…' : confirmLabel}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export function StatusBadge({ value }) {
   const map = {

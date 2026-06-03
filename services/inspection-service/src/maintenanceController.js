@@ -1,5 +1,8 @@
 /** Maintenance logging. */
-const { query, ApiError, asyncHandler, validateBody } = require('@fems/shared');
+const { query, ApiError, asyncHandler, validateBody, notifyActorAndAdmins } = require('@fems/shared');
+
+const dayOnly = (d) => new Date(`${String(d).slice(0, 10)}T00:00:00Z`).getTime();
+const today = () => dayOnly(new Date().toISOString());
 
 const toDto = (r) => ({
   id: r.id,
@@ -32,7 +35,11 @@ const create = asyncHandler(async (req, res) => {
     recommendations: {},
   });
 
-  const ext = await query('SELECT id FROM fire_extinguishers WHERE id = $1', [data.extinguisherId]);
+  if (dayOnly(data.maintenanceDate) > today()) {
+    throw ApiError.badRequest('Maintenance date cannot be in the future.');
+  }
+
+  const ext = await query('SELECT id, serial_number FROM fire_extinguishers WHERE id = $1', [data.extinguisherId]);
   if (!ext.rowCount) throw ApiError.badRequest('Extinguisher does not exist');
 
   const { rows } = await query(
@@ -46,6 +53,14 @@ const create = asyncHandler(async (req, res) => {
 
   // Record that the unit was serviced today.
   await query('UPDATE fire_extinguishers SET last_inspected_at = now() WHERE id = $1', [data.extinguisherId]);
+
+  await notifyActorAndAdmins(req.user, {
+    type: 'maintenance',
+    title: 'Maintenance logged',
+    message: `Maintenance logged for ${ext.rows[0].serial_number}: ${data.actionTaken}.`,
+    relatedEntity: 'extinguisher',
+    relatedId: data.extinguisherId,
+  });
 
   const out = await query(`${SELECT} WHERE m.id = $1`, [rows[0].id]);
   res.status(201).json({ maintenance: toDto(out.rows[0]) });

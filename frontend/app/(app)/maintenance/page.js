@@ -52,16 +52,16 @@ export default function MaintenancePage() {
         {!items ? <Spinner /> : items.length === 0 ? <EmptyState>No maintenance records.</EmptyState> : (
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
-              <thead className="bg-slate-50 text-left text-xs uppercase text-slate-500">
+              <thead className="table-head text-left text-xs uppercase">
                 <tr>
                   <th className="px-4 py-3">Extinguisher</th><th className="px-4 py-3">Action</th>
                   <th className="px-4 py-3">Date</th><th className="px-4 py-3">Issues</th>
                   <th className="px-4 py-3">Recommendations</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
+              <tbody className="divide-rows">
                 {items.map((m) => (
-                  <tr key={m.id} className="hover:bg-slate-50">
+                  <tr key={m.id} className="row-hover">
                     <td className="px-4 py-3 font-medium">{m.serialNumber}</td>
                     <td className="px-4 py-3">{m.actionTaken}</td>
                     <td className="px-4 py-3">{m.maintenanceDate?.slice(0, 10)}</td>
@@ -90,7 +90,7 @@ export default function MaintenancePage() {
           </Field>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Action taken"><input className="input" value={form.actionTaken} onChange={set('actionTaken')} required /></Field>
-            <Field label="Date"><input className="input" type="date" value={form.maintenanceDate} onChange={set('maintenanceDate')} required /></Field>
+            <Field label="Date"><input className="input" type="date" max={new Date().toISOString().slice(0, 10)} value={form.maintenanceDate} onChange={set('maintenanceDate')} required /></Field>
           </div>
           <Field label="Issues identified"><textarea className="input" rows={2} value={form.issuesIdentified} onChange={set('issuesIdentified')} /></Field>
           <Field label="Notes"><textarea className="input" rows={2} value={form.notes} onChange={set('notes')} /></Field>

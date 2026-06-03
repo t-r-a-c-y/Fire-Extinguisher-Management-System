@@ -1,9 +1,13 @@
 /** Fire extinguisher CRUD. */
-const { query, ApiError, asyncHandler, validateBody } = require('@fems/shared');
+const { query, ApiError, asyncHandler, validateBody, notifyActorAndAdmins } = require('@fems/shared');
 
 const TYPES = ['water', 'co2', 'foam', 'dry_chemical'];
 const SIZES = ['2.5lb', '5lb', '9lb', '12lb'];
 const STATUSES = ['active', 'maintenance', 'expired', 'decommissioned'];
+
+/** Date-only comparison helpers (ignore time / timezone). */
+const dayOnly = (d) => new Date(`${String(d).slice(0, 10)}T00:00:00Z`).getTime();
+const today = () => dayOnly(new Date().toISOString());
 
 const toDto = (r) => ({
   id: r.id,
@@ -20,6 +24,16 @@ const toDto = (r) => ({
   updatedAt: r.updated_at,
 });
 
+/** Shared date rules for create/update. */
+function validateDates({ installationDate, expiryDate }) {
+  if (installationDate && dayOnly(installationDate) > today()) {
+    throw ApiError.badRequest('Installation date cannot be in the future.');
+  }
+  if (installationDate && expiryDate && dayOnly(expiryDate) <= dayOnly(installationDate)) {
+    throw ApiError.badRequest('Expiry date must be after the installation date.');
+  }
+}
+
 // POST /extinguishers
 const create = asyncHandler(async (req, res) => {
   const data = validateBody(req.body, {
@@ -31,17 +45,26 @@ const create = asyncHandler(async (req, res) => {
     expiryDate: { required: true, type: 'date' },
     status: { enum: STATUSES },
   });
-  if (new Date(data.expiryDate) < new Date(data.installationDate)) {
-    throw ApiError.badRequest('expiryDate must be on or after installationDate');
-  }
+  validateDates(data);
+
   const { rows } = await query(
     `INSERT INTO fire_extinguishers
        (serial_number, location, type, size, installation_date, expiry_date, status, created_by)
-     VALUES ($1,$2,$3,$4,$5,$6,COALESCE($7,'active'),$8) RETURNING *`,
+     VALUES ($1,$2,$3,$4,$5,$6,COALESCE($7,'active')::extinguisher_status,$8) RETURNING *`,
     [data.serialNumber, data.location, data.type, data.size,
      data.installationDate, data.expiryDate, data.status || null, req.user.id]
   );
-  res.status(201).json({ extinguisher: toDto(rows[0]) });
+  const ext = rows[0];
+
+  await notifyActorAndAdmins(req.user, {
+    type: 'extinguisher',
+    title: 'Extinguisher created',
+    message: `Extinguisher ${ext.serial_number} (${ext.location}) was created.`,
+    relatedEntity: 'extinguisher',
+    relatedId: ext.id,
+  });
+
+  res.status(201).json({ extinguisher: toDto(ext) });
 });
 
 // GET /extinguishers   ?status= &type= &q= &expiringInDays=
@@ -86,6 +109,14 @@ const update = asyncHandler(async (req, res) => {
   });
   if (!Object.keys(data).length) throw ApiError.badRequest('No fields to update');
 
+  // Validate against the merged (existing + incoming) dates.
+  const existing = await query('SELECT installation_date, expiry_date FROM fire_extinguishers WHERE id = $1', [req.params.id]);
+  if (!existing.rowCount) throw ApiError.notFound('Extinguisher not found');
+  validateDates({
+    installationDate: data.installationDate ?? existing.rows[0].installation_date,
+    expiryDate: data.expiryDate ?? existing.rows[0].expiry_date,
+  });
+
   const { rows } = await query(
     `UPDATE fire_extinguishers SET
         serial_number     = COALESCE($1, serial_number),
@@ -99,15 +130,60 @@ const update = asyncHandler(async (req, res) => {
     [data.serialNumber ?? null, data.location ?? null, data.type ?? null, data.size ?? null,
      data.installationDate ?? null, data.expiryDate ?? null, data.status ?? null, req.params.id]
   );
-  if (!rows.length) throw ApiError.notFound('Extinguisher not found');
-  res.json({ extinguisher: toDto(rows[0]) });
+  const ext = rows[0];
+
+  await notifyActorAndAdmins(req.user, {
+    type: 'extinguisher',
+    title: 'Extinguisher updated',
+    message: `Extinguisher ${ext.serial_number} was updated.`,
+    relatedEntity: 'extinguisher',
+    relatedId: ext.id,
+  });
+
+  res.json({ extinguisher: toDto(ext) });
 });
 
 // DELETE /extinguishers/:id
 const remove = asyncHandler(async (req, res) => {
-  const { rowCount } = await query('DELETE FROM fire_extinguishers WHERE id = $1', [req.params.id]);
-  if (!rowCount) throw ApiError.notFound('Extinguisher not found');
+  const { rows } = await query('DELETE FROM fire_extinguishers WHERE id = $1 RETURNING serial_number', [req.params.id]);
+  if (!rows.length) throw ApiError.notFound('Extinguisher not found');
+
+  await notifyActorAndAdmins(req.user, {
+    type: 'extinguisher',
+    title: 'Extinguisher deleted',
+    message: `Extinguisher ${rows[0].serial_number} was deleted.`,
+    relatedEntity: 'extinguisher',
+  });
+
   res.status(204).send();
 });
 
-module.exports = { create, list, getById, update, remove };
+// POST /extinguishers/:id/request  — any user asks admins/inspectors for an
+// action (e.g. update location, purchase a similar unit, schedule inspection).
+const requestAction = asyncHandler(async (req, res) => {
+  const data = validateBody(req.body, {
+    kind: { required: true, enum: ['update_details', 'purchase', 'inspection', 'other'] },
+    message: {},
+  });
+  const ext = await query('SELECT serial_number, location FROM fire_extinguishers WHERE id = $1', [req.params.id]);
+  if (!ext.rowCount) throw ApiError.notFound('Extinguisher not found');
+
+  const labels = {
+    update_details: 'requested an update to the details/location of',
+    purchase: 'requested the purchase of a unit like',
+    inspection: 'requested an inspection of',
+    other: 'sent a request about',
+  };
+  const { notifyRoles } = require('@fems/shared');
+  await notifyRoles(['admin', 'inspector'], {
+    type: 'request',
+    title: 'User request',
+    message: `${req.user.email} ${labels[data.kind]} ${ext.rows[0].serial_number} (${ext.rows[0].location}).` +
+      (data.message ? ` Note: ${data.message}` : ''),
+    relatedEntity: 'extinguisher',
+    relatedId: req.params.id,
+  });
+  res.status(201).json({ message: 'Your request has been sent to the team.' });
+});
+
+module.exports = { create, list, getById, update, remove, requestAction };

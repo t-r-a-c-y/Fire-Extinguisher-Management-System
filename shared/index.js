@@ -5,4 +5,5 @@ module.exports = {
   ...require('./auth'),
   ...require('./validate'),
   ...require('./createApp'),
+  ...require('./notify'),
 };
