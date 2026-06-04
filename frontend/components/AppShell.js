@@ -7,6 +7,7 @@ import { useAuth } from '@/lib/auth';
 import { useTheme } from '@/lib/theme';
 import { api } from '@/lib/api';
 import { StatusBadge } from '@/components/ui';
+import { BellIcon, SunIcon, MoonIcon } from '@/components/icons';
 
 const NAV = [
   { href: '/dashboard', label: 'Dashboard', icon: '📊', roles: ['admin', 'inspector', 'user'] },
@@ -50,7 +51,7 @@ function NotificationBell() {
   return (
     <div className="relative">
       <button className="btn-ghost relative px-2 py-1" onClick={() => setOpen(!open)} aria-label="Notifications">
-        🔔
+        <BellIcon />
         {data.unread > 0 && (
           <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-brand-600 px-1 text-[10px] text-white">
             {data.unread}
@@ -85,7 +86,7 @@ function ThemeToggle() {
   const { theme, toggle } = useTheme();
   return (
     <button className="btn-ghost px-2 py-1" onClick={toggle} aria-label="Toggle theme" title="Toggle light/dark">
-      {theme === 'dark' ? '☀️' : '🌙'}
+      {theme === 'dark' ? <SunIcon /> : <MoonIcon />}
     </button>
   );
 }

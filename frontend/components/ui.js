@@ -1,6 +1,7 @@
 'use client';
 
 import { useState } from 'react';
+import { EyeIcon, EyeOffIcon } from '@/components/icons';
 
 /** Small reusable UI primitives. */
 
@@ -24,7 +25,7 @@ export function PasswordInput({ value, onChange, placeholder, required, autoComp
         aria-label={show ? 'Hide password' : 'Show password'}
         className="absolute inset-y-0 right-0 flex items-center px-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
       >
-        {show ? '🙈' : '👁️'}
+        {show ? <EyeOffIcon width={18} height={18} /> : <EyeIcon width={18} height={18} />}
       </button>
     </div>
   );

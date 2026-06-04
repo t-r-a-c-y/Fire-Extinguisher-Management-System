@@ -1,8 +1,9 @@
 # 🎤 Presentation-Day Runbook
 
 A start-to-finish checklist for demoing the TZW Fire Extinguisher Management
-System. Commands are for **PowerShell** on Windows, run from the project root:
-`c:\Users\Administrator\Documents\practice of ne\_ne_restful`.
+System. Commands are for **PowerShell** on Windows, run from the project root
+(the folder containing `docker-compose.yml`), e.g. `cd` into wherever you cloned
+or extracted the project before running any command below.
 
 ---
 

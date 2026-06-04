@@ -5,7 +5,11 @@
  * - Stores access/refresh tokens in localStorage.
  * - Transparently retries once on 401 by refreshing the access token.
  */
-const BASE = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8080/api';
+// Default to a same-origin relative path ('/api'). Next.js rewrites this to the
+// gateway (see next.config.js), so the browser never makes a cross-origin
+// request — which is what previously broke file downloads. Set
+// NEXT_PUBLIC_API_URL only if you must call the gateway directly cross-origin.
+const BASE = process.env.NEXT_PUBLIC_API_URL || '/api';
 
 const store = {
   get access() { return typeof window !== 'undefined' ? localStorage.getItem('fems_access') : null; },

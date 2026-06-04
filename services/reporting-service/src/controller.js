@@ -11,7 +11,9 @@ const getInspections = asyncHandler(async (req, res) => res.json(await reports.i
 const getCompliance = asyncHandler(async (req, res) =>
   res.json(await reports.complianceReport(scopeOf(req), Number(req.query.upcomingDays) || 30)));
 const getMaintenance = asyncHandler(async (req, res) => res.json(await reports.maintenanceReport(scopeOf(req))));
-const getSummary = asyncHandler(async (req, res) => res.json(await reports.dashboardSummary(scopeOf(req))));
+// The dashboard summary is system-wide for EVERY role, so a regular user can see
+// the real fleet totals (total extinguishers, compliance, etc.) — not personal zeros.
+const getSummary = asyncHandler(async (req, res) => res.json(await reports.dashboardSummary({})));
 
 /**
  * Flatten each report into (csvRows, pdfSections) for export.

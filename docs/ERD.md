@@ -2,6 +2,10 @@
 
 Database: **PostgreSQL 16**. UUID primary keys (`gen_random_uuid()`), `TIMESTAMPTZ` timestamps, enum types for controlled vocabularies, and `updated_at` triggers.
 
+> 🖼️ **Rendered diagram:** [`diagrams/database-erd.svg`](diagrams/database-erd.svg) — a standalone vector image (open in any browser, or drop straight into slides/report). Regenerate it any time with `node docs/diagrams/generate-erd.js`.
+
+![Database ERD](diagrams/database-erd.svg)
+
 ## ERD (Mermaid)
 
 ```mermaid

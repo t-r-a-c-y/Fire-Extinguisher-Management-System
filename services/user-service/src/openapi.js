@@ -70,10 +70,10 @@ module.exports = {
       post: { tags: ['Auth'], summary: 'Revoke a refresh token', responses: { 200: { description: 'OK' } } },
     },
     '/auth/forgot-password': {
-      post: { tags: ['Auth'], summary: 'Request a password reset token', responses: { 200: { description: 'OK' } } },
+      post: { tags: ['Auth'], summary: 'Request a one-time passcode (OTP) by email; OTP is logged server-side, never returned', responses: { 200: { description: 'OK' } } },
     },
     '/auth/reset-password': {
-      post: { tags: ['Auth'], summary: 'Reset password using a token', responses: { 200: { description: 'OK' } } },
+      post: { tags: ['Auth'], summary: 'Reset password using email + OTP', responses: { 200: { description: 'OK' } } },
     },
     '/users/me': {
       get: { tags: ['Profile'], summary: 'Get my profile', security: [{ bearerAuth: [] }],

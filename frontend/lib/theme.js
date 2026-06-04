@@ -8,8 +8,9 @@ export function ThemeProvider({ children }) {
   const [theme, setTheme] = useState('light');
 
   useEffect(() => {
-    const saved = (typeof window !== 'undefined' && localStorage.getItem('fems_theme')) ||
-      (window.matchMedia?.('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
+    // Default to light ("white") mode. We intentionally do NOT follow the OS
+    // `prefers-color-scheme`; only an explicit user choice (saved earlier) wins.
+    const saved = (typeof window !== 'undefined' && localStorage.getItem('fems_theme')) || 'light';
     apply(saved);
     setTheme(saved);
   }, []);

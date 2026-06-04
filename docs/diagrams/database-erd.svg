@@ -1,0 +1,145 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1290" height="600" viewBox="0 0 1290 600" font-family="ui-sans-serif,Segoe UI,Arial">
+  <rect width="1290" height="600" fill="#f8fafc"/>
+  <text x="40" y="32" font-size="22" font-weight="800" fill="#b91c1c">TZW FEMS — Database ERD</text>
+  <text x="40" y="52" font-size="12.5" fill="#64748b">PostgreSQL 16 · UUID primary keys · one-to-many relationships (●&#160;= many side)</text>
+  <g transform="translate(0,30)">
+<path d="M 360 280 C 325 280, 325 99, 290 99" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="290" cy="99" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="325" y="183.5" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">has</text>
+<path d="M 360 280 C 325 280, 325 279, 290 279" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="290" cy="279" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="325" y="273.5" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">has</text>
+<path d="M 360 280 C 325 280, 325 470, 290 470" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="290" cy="470" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="325" y="369" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">receives</text>
+<path d="M 610 280 C 645 280, 645 141, 680 141" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="680" cy="141" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="645" y="204.5" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">created_by</text>
+<path d="M 610 280 C 645 280, 645 451, 680 451" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="680" cy="451" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="645" y="359.5" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">assigned / scheduled</text>
+<path d="M 805 222 C 805 222, 805 370, 805 370" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="805" cy="370" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="805" y="290" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">inspected by</text>
+<path d="M 930 141 C 1032.5 141, 1032.5 230, 1135 230" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="1135" cy="230" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="1032.5" y="179.5" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">maintained by</text>
+<path d="M 930 451 C 1032.5 451, 1032.5 370, 1135 370" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="1135" cy="370" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="1032.5" y="404.5" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">may trigger</text>
+<path d="M 485 350 C 747.5 350, 747.5 300, 1010 300" fill="none" stroke="#94a3b8" stroke-width="1.6"/>
+<circle cx="1010" cy="300" r="3.2" fill="#fff" stroke="#64748b" stroke-width="1.4"/>
+<text x="747.5" y="319" font-size="11" fill="#64748b" text-anchor="middle" font-family="ui-sans-serif,Segoe UI,Arial">performed_by</text>
+<g>
+    <rect x="40" y="40" width="250" height="118" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="40" y="40" width="250" height="30" rx="8" fill="#334155"/>
+    <rect x="40" y="62" width="250" height="8" fill="#334155"/>
+    <text x="52" y="60" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">refresh_tokens</text>
+<text x="52" y="85" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="278" y="85" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="48" y1="91" x2="282" y2="91" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="107" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">user_id</text><text x="278" y="107" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="48" y1="113" x2="282" y2="113" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="129" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">token_hash</text><text x="278" y="129" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">varchar</text>
+<line x1="48" y1="135" x2="282" y2="135" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="151" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">revoked</text><text x="278" y="151" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">boolean</text>
+</g>
+<g>
+    <rect x="40" y="220" width="250" height="118" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="40" y="220" width="250" height="30" rx="8" fill="#334155"/>
+    <rect x="40" y="242" width="250" height="8" fill="#334155"/>
+    <text x="52" y="240" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">password_resets</text>
+<text x="52" y="265" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="278" y="265" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="48" y1="271" x2="282" y2="271" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="287" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">user_id</text><text x="278" y="287" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="48" y1="293" x2="282" y2="293" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="309" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">token_hash</text><text x="278" y="309" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">varchar</text>
+<line x1="48" y1="315" x2="282" y2="315" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="331" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">used</text><text x="278" y="331" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">boolean</text>
+</g>
+<g>
+    <rect x="40" y="400" width="250" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="40" y="400" width="250" height="30" rx="8" fill="#334155"/>
+    <rect x="40" y="422" width="250" height="8" fill="#334155"/>
+    <text x="52" y="420" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">notifications</text>
+<text x="52" y="445" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="278" y="445" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="48" y1="451" x2="282" y2="451" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="467" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">user_id</text><text x="278" y="467" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="48" y1="473" x2="282" y2="473" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="489" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">type</text><text x="278" y="489" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">varchar</text>
+<line x1="48" y1="495" x2="282" y2="495" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="511" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">title</text><text x="278" y="511" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">varchar</text>
+<line x1="48" y1="517" x2="282" y2="517" stroke="#f1f5f9" stroke-width="1"/>
+<text x="52" y="533" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">is_read</text><text x="278" y="533" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">boolean</text>
+</g>
+<g>
+    <rect x="360" y="210" width="250" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="360" y="210" width="250" height="30" rx="8" fill="#b91c1c"/>
+    <rect x="360" y="232" width="250" height="8" fill="#b91c1c"/>
+    <text x="372" y="230" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">users</text>
+<text x="372" y="255" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="598" y="255" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="368" y1="261" x2="602" y2="261" stroke="#f1f5f9" stroke-width="1"/>
+<text x="372" y="277" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">email</text><text x="598" y="277" font-size="11" fill="#7c3aed" text-anchor="end" font-family="ui-monospace,Consolas,monospace">UK</text>
+<line x1="368" y1="283" x2="602" y2="283" stroke="#f1f5f9" stroke-width="1"/>
+<text x="372" y="299" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">password_hash</text><text x="598" y="299" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">varchar</text>
+<line x1="368" y1="305" x2="602" y2="305" stroke="#f1f5f9" stroke-width="1"/>
+<text x="372" y="321" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">role</text><text x="598" y="321" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">user_role</text>
+<line x1="368" y1="327" x2="602" y2="327" stroke="#f1f5f9" stroke-width="1"/>
+<text x="372" y="343" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">is_active</text><text x="598" y="343" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">boolean</text>
+</g>
+<g>
+    <rect x="680" y="60" width="250" height="162" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="680" y="60" width="250" height="30" rx="8" fill="#b91c1c"/>
+    <rect x="680" y="82" width="250" height="8" fill="#b91c1c"/>
+    <text x="692" y="80" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">fire_extinguishers</text>
+<text x="692" y="105" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="918" y="105" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="688" y1="111" x2="922" y2="111" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="127" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">serial_number</text><text x="918" y="127" font-size="11" fill="#7c3aed" text-anchor="end" font-family="ui-monospace,Consolas,monospace">UK</text>
+<line x1="688" y1="133" x2="922" y2="133" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="149" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">type</text><text x="918" y="149" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">enum</text>
+<line x1="688" y1="155" x2="922" y2="155" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="171" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">status</text><text x="918" y="171" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">enum</text>
+<line x1="688" y1="177" x2="922" y2="177" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="193" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">expiry_date</text><text x="918" y="193" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">date</text>
+<line x1="688" y1="199" x2="922" y2="199" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="215" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">created_by</text><text x="918" y="215" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+</g>
+<g>
+    <rect x="680" y="370" width="250" height="162" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="680" y="370" width="250" height="30" rx="8" fill="#334155"/>
+    <rect x="680" y="392" width="250" height="8" fill="#334155"/>
+    <text x="692" y="390" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">inspections</text>
+<text x="692" y="415" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="918" y="415" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="688" y1="421" x2="922" y2="421" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="437" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">extinguisher_id</text><text x="918" y="437" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="688" y1="443" x2="922" y2="443" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="459" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">assigned_to</text><text x="918" y="459" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="688" y1="465" x2="922" y2="465" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="481" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">scheduled_by</text><text x="918" y="481" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="688" y1="487" x2="922" y2="487" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="503" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">status</text><text x="918" y="503" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">enum</text>
+<line x1="688" y1="509" x2="922" y2="509" stroke="#f1f5f9" stroke-width="1"/>
+<text x="692" y="525" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">result</text><text x="918" y="525" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">enum</text>
+</g>
+<g>
+    <rect x="1010" y="230" width="250" height="140" rx="8" fill="#ffffff" stroke="#cbd5e1" stroke-width="1.5"/>
+    <rect x="1010" y="230" width="250" height="30" rx="8" fill="#334155"/>
+    <rect x="1010" y="252" width="250" height="8" fill="#334155"/>
+    <text x="1022" y="250" font-size="14" font-weight="700" fill="#fff" font-family="ui-monospace,Consolas,monospace">maintenance_logs</text>
+<text x="1022" y="275" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">id</text><text x="1248" y="275" font-size="11" fill="#b91c1c" text-anchor="end" font-family="ui-monospace,Consolas,monospace">PK</text>
+<line x1="1018" y1="281" x2="1252" y2="281" stroke="#f1f5f9" stroke-width="1"/>
+<text x="1022" y="297" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">extinguisher_id</text><text x="1248" y="297" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="1018" y1="303" x2="1252" y2="303" stroke="#f1f5f9" stroke-width="1"/>
+<text x="1022" y="319" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">inspection_id</text><text x="1248" y="319" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="1018" y1="325" x2="1252" y2="325" stroke="#f1f5f9" stroke-width="1"/>
+<text x="1022" y="341" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">performed_by</text><text x="1248" y="341" font-size="11" fill="#2563eb" text-anchor="end" font-family="ui-monospace,Consolas,monospace">FK</text>
+<line x1="1018" y1="347" x2="1252" y2="347" stroke="#f1f5f9" stroke-width="1"/>
+<text x="1022" y="363" font-size="12.5" fill="#0f172a" font-family="ui-monospace,Consolas,monospace">action_taken</text><text x="1248" y="363" font-size="11" fill="#94a3b8" text-anchor="end" font-family="ui-monospace,Consolas,monospace">varchar</text>
+</g>
+
+    <g transform="translate(40,530)" font-size="11.5" font-family="ui-monospace,Consolas,monospace">
+      <text x="0" y="0" fill="#b91c1c" font-weight="700">PK</text><text x="26" y="0" fill="#475569">primary key</text>
+      <text x="130" y="0" fill="#2563eb" font-weight="700">FK</text><text x="156" y="0" fill="#475569">foreign key</text>
+      <text x="260" y="0" fill="#7c3aed" font-weight="700">UK</text><text x="286" y="0" fill="#475569">unique key</text>
+    </g>
+  </g>
+</svg>

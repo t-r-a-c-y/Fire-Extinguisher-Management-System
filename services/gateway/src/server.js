@@ -13,8 +13,20 @@ const morgan = require('morgan');
 const { createProxyMiddleware } = require('http-proxy-middleware');
 
 const app = express();
-app.use(helmet());
-app.use(cors({ origin: process.env.CORS_ORIGIN || '*' }));
+// This gateway serves JSON and file downloads (PDF/CSV), not HTML, so the
+// browser-document protections in helmet's defaults (a strict Content-Security-
+// Policy and a `same-origin` Cross-Origin-Resource-Policy) add no value here and
+// can block legitimate cross-origin downloads. Keep the useful headers, drop
+// those two.
+app.use(helmet({
+  contentSecurityPolicy: false,
+  crossOriginResourcePolicy: { policy: 'cross-origin' },
+}));
+app.use(cors({
+  origin: process.env.CORS_ORIGIN || '*',
+  // Let the browser read the download filename when called cross-origin.
+  exposedHeaders: ['Content-Disposition'],
+}));
 app.use(morgan('dev'));
 
 const TARGETS = {
